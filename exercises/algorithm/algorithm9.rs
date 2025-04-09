@@ -110,13 +110,26 @@ where
 
     fn next(&mut self) -> Option<T> {
         if self.count == 0  {
-            None
-        } else {
-            let res = self.items[1].clone();
-            self.count -= 1;
-            self.items.remove(1);
-            Some(res)
+            return None;
         }
+
+        let res = self.items.swap_remove(1);
+        self.count -= 1;
+
+        if self.count > 0 {
+            let mut idx = 1;
+            while self.children_present(idx) {
+                let child = self.smallest_child_idx(idx);
+                if !(self.comparator)(&self.items[idx], &self.items[child]) {
+                    self.items.swap(idx, child);
+                    idx = child;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        Some(res)
     }
 }
 
